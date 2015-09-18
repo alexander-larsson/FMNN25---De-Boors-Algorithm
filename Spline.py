@@ -39,6 +39,19 @@ class Spline:
         """
         return (ur-u)/(ur-ul)
 
+    def blossom_recursion(control_points,knots):
+        if not knots:
+            return control_points[0]
+        else:
+            gap = len(knots)/2
+            leftmost = knots[:-gap]
+            rightmost = knots[gap:]
+            #Might not work with numpy will check
+            zipped = list(zip(leftmost,rightmost))
+
+
+            return blossom_recursion(new_control_points,knots[1:-1])
+
 
     def plot(self):
         """Plots the curve"""
