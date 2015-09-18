@@ -10,7 +10,6 @@ class Spline:
         degree = The degree of the B-spline
         """
         self.d = N.array(control_points)
-        print(self.d)
         self.p = degree
         # Caluclate the knots we need
         # p 0 knots -> lin space -> p 1 knots
@@ -28,13 +27,13 @@ class Spline:
         i = (self.u > u).argmax() # hot interval is [ui-1,ui]
 
         # 2. Select control points dI-3 ... dI (slides 1.9)
-        # Slides say dI-2 ... dI+1 in many other places so I
-        # assume this is correct instead.
+        # Slides say dI-2 ... dI+1 in many other places but
+        # it seems  dI-3 ... dI works.
         # Indexing gets weird because of the hot interval i is
-        # + 1 over what it is on all the slides and python
+        # + 1 more than what it is on all the slides and python
         # slicing excludes the last index.
         # i is indexed from 0 in the slides.
-        ctrl_pts = self.d[i-3:i+1]
+        ctrl_pts = self.d[i-4:i+1]
 
         # 3. Run the blossom recursion
         knots = self.u[i-3:i+3]
@@ -58,7 +57,7 @@ class Spline:
         return alpha
 
     def __blossom_recursion__(self,u,control_points,knots):
-        if control_points.size == 1:
+        if knots.size == 0:
             return control_points[0]
         else:
             gap = len(knots)/2
@@ -66,11 +65,10 @@ class Spline:
             rightmost = knots[gap:]
             alpha = self.__createAlpha__(u)
             alphas = N.array([ alpha(a,b) for (a,b) in zip(rightmost,leftmost) ])
-            new_control_points = N.zeros((control_points.size - 1, 0))
-            for i in range(new_control_points.size):
+            new_control_points = N.zeros((control_points.size//2 - 1, 2))
+            for i in range(new_control_points.size//2):
                 a = alphas[i]
                 new_control_points[i] = a*control_points[i] + (1-a)*control_points[i+1]
-
             return self.__blossom_recursion__(u,new_control_points,knots[1:-1])
 
 
