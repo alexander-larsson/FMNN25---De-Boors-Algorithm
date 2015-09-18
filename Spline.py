@@ -1,3 +1,5 @@
+#http://www.cs.mtu.edu/~shene/COURSES/cs3621/NOTES/spline/de-Boor.html
+
 import numpy as N
 
 class Spline:
@@ -29,26 +31,39 @@ class Spline:
         ctrl_pts = self.d[i-3:i+1]
 
         # 3. Run the blossom recursion
+        # Has to figure out how many knots we need here
+        su = self.blossom_recursion(u,ctrl_pts,knots)
 
-    def __alpha__(self,u,ur,ul):
+
+    def __createAlpha__(self,u):
         """
+        Creates an alpha function with fixed u
         Parameters:
         u = The u for wich we are evaluating s(u)
-        ur = The rightmost knot
-        ul = The leftmost knot
         """
-        return (ur-u)/(ur-ul)
+        def alpha(self,ur,ul):
+            """
+            Parameters:
+            ur = The rightmost knot
+            ul = The leftmost knot
+            """
+            return (ur-u)/(ur-ul)
+        return alpha
 
-    def blossom_recursion(control_points,knots):
+    def blossom_recursion(self,u,control_points,knots):
         if not knots:
             return control_points[0]
         else:
             gap = len(knots)/2
-            leftmost = knots[:-gap]
+            leftmost = knots[:gap]
             rightmost = knots[gap:]
-            #Might not work with numpy will check
-            zipped = list(zip(leftmost,rightmost))
+            alpha = self.__createAlpha__(u)
+            alphas = N.array([ alpha(a,b) for (a,b) in zip(rightmost,leftmost) ])
+            new_control_points = N.zeros((1, control_points.size - 1))
 
+            for i in range(new_control_points.size):
+                a = alphas[i]
+                new_control_points[i] = a*control_points[i] + (a - 1)control_points[i+1]
 
             return blossom_recursion(new_control_points,knots[1:-1])
 
