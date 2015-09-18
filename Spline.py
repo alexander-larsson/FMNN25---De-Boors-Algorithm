@@ -25,7 +25,7 @@ class Spline:
         """Computes s(u)"""
         # Belov is the steps from 1.9 in slides
         # 1. Find hot interval
-        i = (self.u > u).argmax() # hot interval is [ui-1,ui]
+        i = (self.u >= u).argmax() # hot interval is [ui-1,ui]
 
         # 2. Select control points dI-3 ... dI (slides 1.9)
         # Slides say dI-2 ... dI+1 in many other places but
@@ -80,7 +80,6 @@ class Spline:
         points = N.array(list(map(self,u_values)))
         # This print shows that the last point is wrong
         # Should be [1,0] but is [0,0]
-        print(points)
         x_points = [x for [x, y] in points]
         y_points = [y for [x, y] in points]
         plt.plot(x_points,y_points)
