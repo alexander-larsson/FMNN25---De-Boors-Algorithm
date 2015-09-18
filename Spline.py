@@ -1,6 +1,7 @@
 #http://www.cs.mtu.edu/~shene/COURSES/cs3621/NOTES/spline/de-Boor.html
 
 import numpy as N
+import matplotlib.pyplot as plt
 
 class Spline:
     def __init__(self,control_points,degree):
@@ -74,9 +75,20 @@ class Spline:
 
     def plot(self):
         """Plots the curve"""
-        pass
+        u_values = N.linspace(0.0, 1.0, num=100)
+        # Mapping over self means mapping over self.__call__
+        points = N.array(list(map(self,u_values)))
+        # This print shows that the last point is wrong
+        # Should be [1,0] but is [0,0]
+        print(points)
+        x_points = [x for [x, y] in points]
+        y_points = [y for [x, y] in points]
+        plt.plot(x_points,y_points)
+        plt.ylabel('Super awesome B-spline')
+        plt.show()
 
+# Some code that tests the program
 cp = [(0,0),(0,1),(1,1),(1,0)]
 degree = 3
 s = Spline(cp,degree)
-print(s(0.5))
+s.plot()
