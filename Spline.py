@@ -3,23 +3,29 @@
 import numpy as N
 
 class Spline:
-
-    def __init__(self,control_points,knots,degree):
+    def __init__(self,control_points,degree):
         """
         Parameters:
         control_points = A list of control points
-        knots = A list of knots
         degree = The degree of the B-spline
         """
         self.d = N.array(control_points)
-        self.u = N.array(knots)
+        print(self.d)
         self.p = degree
+        # Caluclate the knots we need
+        # p 0 knots -> lin space -> p 1 knots
+        start = N.zeros((1,degree))[0]
+        nbr_internal_knots = len(control_points)-degree+1
+        middle = N.linspace(0.0, 1.0, num=nbr_internal_knots)
+        end = N.ones((1,degree))[0]
+        self.u = N.concatenate((start,middle,end))
+
 
     def __call__(self,u):
         """Computes s(u)"""
         # Belov is the steps from 1.9 in slides
         # 1. Find hot interval
-        i = (self.knots > self.u).argmax() # hot interval is [ui-1,ui]
+        i = (self.u > u).argmax() # hot interval is [ui-1,ui]
 
         # 2. Select control points dI-3 ... dI (slides 1.9)
         # Slides say dI-2 ... dI+1 in many other places so I
@@ -31,8 +37,9 @@ class Spline:
         ctrl_pts = self.d[i-3:i+1]
 
         # 3. Run the blossom recursion
-        # Has to figure out how many knots we need here
-        su = self.blossom_recursion(u,ctrl_pts,knots)
+        knots = self.u[i-3:i+3]
+        su = self.__blossom_recursion__(u,ctrl_pts,knots)
+        return su
 
 
     def __createAlpha__(self,u):
@@ -41,7 +48,7 @@ class Spline:
         Parameters:
         u = The u for wich we are evaluating s(u)
         """
-        def alpha(self,ur,ul):
+        def alpha(ur,ul):
             """
             Parameters:
             ur = The rightmost knot
@@ -50,8 +57,8 @@ class Spline:
             return (ur-u)/(ur-ul)
         return alpha
 
-    def blossom_recursion(self,u,control_points,knots):
-        if not knots:
+    def __blossom_recursion__(self,u,control_points,knots):
+        if control_points.size == 1:
             return control_points[0]
         else:
             gap = len(knots)/2
@@ -59,15 +66,19 @@ class Spline:
             rightmost = knots[gap:]
             alpha = self.__createAlpha__(u)
             alphas = N.array([ alpha(a,b) for (a,b) in zip(rightmost,leftmost) ])
-            new_control_points = N.zeros((1, control_points.size - 1))
-
+            new_control_points = N.zeros((control_points.size - 1, 0))
             for i in range(new_control_points.size):
                 a = alphas[i]
-                new_control_points[i] = a*control_points[i] + (a - 1)control_points[i+1]
+                new_control_points[i] = a*control_points[i] + (1-a)*control_points[i+1]
 
-            return blossom_recursion(new_control_points,knots[1:-1])
+            return self.__blossom_recursion__(u,new_control_points,knots[1:-1])
 
 
     def plot(self):
         """Plots the curve"""
         pass
+
+cp = [(0,0),(0,1),(1,1),(1,0)]
+degree = 3
+s = Spline(cp,degree)
+print(s(0.5))
