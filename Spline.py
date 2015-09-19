@@ -25,8 +25,7 @@ class Spline:
         """Computes s(u)"""
         # Belov is the steps from 1.9 in slides
         # 1. Find hot interval
-        i = (self.u >= u).argmax() # hot interval is [ui-1,ui]
-
+        i = self.__find_hot_interval__(u) # hot interval is [ui-1,ui]
         # 2. Select control points dI-3 ... dI (slides 1.9)
         # Slides say dI-2 ... dI+1 in many other places but
         # it seems  dI-3 ... dI works.
@@ -40,6 +39,20 @@ class Spline:
         knots = self.u[i-3:i+3]
         su = self.__blossom_recursion__(u,ctrl_pts,knots)
         return su
+
+    def __find_hot_interval__(self,u):
+        """
+        Needed to handle the case of leading zeros and trailing ones
+        The methods in the slides fail to pick the corect index.
+        (They return index 0 for [0,0,0,0,1,1,1,1] u = 0)
+        """
+        if u == 0:
+            for i in range(self.u.size-1):
+                if u < self.u[i]:
+                    return i
+        for i in range(self.u.size-1):
+            if self.u[i] <= u <= self.u[i+1]:
+                return i+1
 
 
     def __createAlpha__(self,u):
