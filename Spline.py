@@ -33,8 +33,7 @@ class Spline:
         # + 1 more than what it is on all the slides and python
         # slicing excludes the last index.
         # i is indexed from 0 in the slides.
-        ctrl_pts = self.d[i-4:i+1]
-
+        ctrl_pts = self.d[i-4:i]
         # 3. Run the blossom recursion
         knots = self.u[i-3:i+3]
         su = self.__blossom_recursion__(u,ctrl_pts,knots)
@@ -74,7 +73,7 @@ class Spline:
         if knots.size == 0:
             return control_points[0]
         else:
-            gap = len(knots)/2
+            gap = len(knots)//2
             leftmost = knots[:gap]
             rightmost = knots[gap:]
             alpha = self.__createAlpha__(u)
@@ -108,7 +107,7 @@ class Spline:
         plt.show()
 
 # Some code that tests the program
-cp = [(0,0),(0,1),(1,1),(1,0)]
+cp = [(0,0),(1,1),(2,1),(3,0),(4,3)]
 degree = 3
 s = Spline(cp,degree)
 s.plot(True)
