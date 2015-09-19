@@ -73,8 +73,12 @@ class Spline:
             return self.__blossom_recursion__(u,new_control_points,knots[1:-1])
 
 
-    def plot(self):
-        """Plots the curve"""
+    def plot(self,plot_control_polygon):
+        """
+        Plots the curve
+        Parameters:
+        plot_control_polygon = The control polygon will be plotted if this is True
+        """
         u_values = N.linspace(0.0, 1.0, num=100)
         # Mapping over self means mapping over self.__call__
         points = N.array(list(map(self,u_values)))
@@ -83,6 +87,10 @@ class Spline:
         x_points = [x for [x, y] in points]
         y_points = [y for [x, y] in points]
         plt.plot(x_points,y_points)
+        if plot_control_polygon:
+            x_ctrl_pts = [x for [x, y] in self.d]
+            y_ctrl_pts = [y for [x, y] in self.d]
+            plt.plot(x_ctrl_pts,y_ctrl_pts,'ro-')
         plt.ylabel('Super awesome B-spline')
         plt.show()
 
@@ -90,4 +98,4 @@ class Spline:
 cp = [(0,0),(0,1),(1,1),(1,0)]
 degree = 3
 s = Spline(cp,degree)
-s.plot()
+s.plot(True)
