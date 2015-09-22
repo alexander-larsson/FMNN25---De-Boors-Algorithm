@@ -1,9 +1,28 @@
 #http://www.cs.mtu.edu/~shene/COURSES/cs3621/NOTES/spline/de-Boor.html
+#http://booksite.elsevier.com/samplechapters/9781558607378/9781558607378.PDF
 
 import numpy as N
 import matplotlib.pyplot as plt
 
+
+def generate_splices(knot_sqs,degree):
+    lst = []
+    for i in range(len(knot_sqs) - degree +1):
+        lst.append(knot_sqs[i:degree+i])
+    return lst
+def Greville_abscissae(lst):
+    xs,ys = zip(*lst)
+    return  (sum(xs)/len(xs),sum(ys)/len(ys))
+
 class Spline:
+
+    @classmethod
+    def init_by_knots(cls,knot_sqs,degree):
+        splices = generate_splices(knot_sqs,degree)
+        control_points = splices.map(Greville_abscissae())
+        return cls.__init__(control_points,degree)
+
+
     def __init__(self,control_points,degree):
         """
         Parameters:
@@ -96,15 +115,21 @@ class Spline:
         points = N.array(list(map(self,u_values)))
         # This print shows that the last point is wrong
         # Should be [1,0] but is [0,0]
+        
+        #x_points, y_points = zip(*points)
+
         x_points = [x for [x, y] in points]
         y_points = [y for [x, y] in points]
+        
         plt.plot(x_points,y_points)
         if plot_control_polygon:
+            #x_ctrl_pts,y_ctrl_pts = zip(*self.d)
             x_ctrl_pts = [x for [x, y] in self.d]
             y_ctrl_pts = [y for [x, y] in self.d]
             plt.plot(x_ctrl_pts,y_ctrl_pts,'ro-')
         plt.ylabel('Super awesome B-spline')
         plt.show()
+
 
 # Some code that tests the program
 cp = [(0,0),(1,1),(2,1),(3,0),(4,3)]
